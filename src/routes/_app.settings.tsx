@@ -25,7 +25,7 @@ export const Route = createFileRoute("/_app/settings")({
 });
 
 function SettingsPage() {
-  const { user, signOut } = useAuth();
+  const { user, logout } = useAuth();
   const uid = useUid();
   const navigate = useNavigate();
   const invalidate = useInvalidateAll();
@@ -113,7 +113,7 @@ function SettingsPage() {
           size="sm"
           className="mt-4"
           onClick={async () => {
-            await signOut();
+            await logout();
             navigate({ to: "/login", replace: true });
           }}
         >
