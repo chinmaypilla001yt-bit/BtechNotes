@@ -14,12 +14,13 @@ import { getStorage, type FirebaseStorage } from "firebase/storage";
 
 export const firebaseConfig = {
   apiKey: import.meta.env['VITE_FIREBASE_API_KEY'] || "YOUR_API_KEY",
-  authDomain: import.meta.env['VITE_FIREBASE_AUTH_DOMAIN'] || "YOUR_AUTH_DOMAIN",
-  projectId: import.meta.env['VITE_FIREBASE_PROJECT_ID'] || "YOUR_PROJECT_ID",
-  storageBucket: import.meta.env['VITE_FIREBASE_STORAGE_BUCKET'] || "YOUR_STORAGE_BUCKET",
-  messagingSenderId: import.meta.env['VITE_FIREBASE_MESSAGING_SENDER_ID'] || "YOUR_MESSAGING_SENDER_ID",
-  appId: import.meta.env['VITE_FIREBASE_APP_ID'] || "YOUR_APP_ID",
+  authDomain: import.meta.env['VITE_FIREBASE_AUTH_DOMAIN'] || "studyforge-01.firebaseapp.com",
+  projectId: import.meta.env['VITE_FIREBASE_PROJECT_ID'] || "studyforge-01",
+  storageBucket: import.meta.env['VITE_FIREBASE_STORAGE_BUCKET'] || "studyforge-01.firebasestorage.app",
+  messagingSenderId: import.meta.env['VITE_FIREBASE_MESSAGING_SENDER_ID'] || "1053802488820",
+  appId: import.meta.env['VITE_FIREBASE_APP_ID'] || "1:1053802488820:web:a4dc9b42ddb70673a68fa1",
 };
+
 
 /** True only when every config value has been replaced with a real value. */
 export const isFirebaseConfigured = Object.values(firebaseConfig).every(
