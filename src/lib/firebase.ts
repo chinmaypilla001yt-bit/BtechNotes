@@ -13,7 +13,7 @@ import { getFirestore, type Firestore } from "firebase/firestore";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
 
 export const firebaseConfig = {
-  apiKey: import.meta.env['VITE_FIREBASE_API_KEY'] || "YOUR_API_KEY",
+  apiKey: import.meta.env['VITE_FIREBASE_API_KEY'] || "AIzaSyBxALOdDrswHqmiFURQLWOsMcNJ3wzR7kU",
   authDomain: import.meta.env['VITE_FIREBASE_AUTH_DOMAIN'] || "studyforge-01.firebaseapp.com",
   projectId: import.meta.env['VITE_FIREBASE_PROJECT_ID'] || "studyforge-01",
   storageBucket: import.meta.env['VITE_FIREBASE_STORAGE_BUCKET'] || "studyforge-01.firebasestorage.app",
