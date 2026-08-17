@@ -12,13 +12,19 @@ import { getAuth, GoogleAuthProvider, type Auth } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
 
+function configuredValue(value: unknown, fallback: string): string {
+  if (typeof value !== "string") return fallback;
+  const normalized = value.trim();
+  return normalized && !normalized.startsWith("YOUR_") ? normalized : fallback;
+}
+
 export const firebaseConfig = {
-  apiKey: import.meta.env['VITE_FIREBASE_API_KEY'] || "AIzaSyBxALOdDrswHqmiFURQLWOsMcNJ3wzR7kU",
-  authDomain: import.meta.env['VITE_FIREBASE_AUTH_DOMAIN'] || "studyforge-01.firebaseapp.com",
-  projectId: import.meta.env['VITE_FIREBASE_PROJECT_ID'] || "studyforge-01",
-  storageBucket: import.meta.env['VITE_FIREBASE_STORAGE_BUCKET'] || "studyforge-01.firebasestorage.app",
-  messagingSenderId: import.meta.env['VITE_FIREBASE_MESSAGING_SENDER_ID'] || "1053802488820",
-  appId: import.meta.env['VITE_FIREBASE_APP_ID'] || "1:1053802488820:web:a4dc9b42ddb70673a68fa1",
+  apiKey: configuredValue(import.meta.env['VITE_FIREBASE_API_KEY'], "AIzaSyBxALOdDrswHqmiFURQLWOsMcNJ3wzR7kU"),
+  authDomain: configuredValue(import.meta.env['VITE_FIREBASE_AUTH_DOMAIN'], "studyforge-01.firebaseapp.com"),
+  projectId: configuredValue(import.meta.env['VITE_FIREBASE_PROJECT_ID'], "studyforge-01"),
+  storageBucket: configuredValue(import.meta.env['VITE_FIREBASE_STORAGE_BUCKET'], "studyforge-01.firebasestorage.app"),
+  messagingSenderId: configuredValue(import.meta.env['VITE_FIREBASE_MESSAGING_SENDER_ID'], "1053802488820"),
+  appId: configuredValue(import.meta.env['VITE_FIREBASE_APP_ID'], "1:1053802488820:web:a4dc9b42ddb70673a68fa1"),
 };
 
 
