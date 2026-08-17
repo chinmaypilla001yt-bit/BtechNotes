@@ -10,33 +10,202 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
+import { Route as AppFilesRouteImport } from './routes/_app.files'
+import { Route as AppRecentRouteImport } from './routes/_app.recent'
+import { Route as AppSettingsRouteImport } from './routes/_app.settings'
+import { Route as AppChaptersIdRouteImport } from './routes/_app.chapters.$id'
+import { Route as AppNotesIndexRouteImport } from './routes/_app.notes.index'
+import { Route as AppNotesIdRouteImport } from './routes/_app.notes.$id'
+import { Route as AppNotesNewRouteImport } from './routes/_app.notes.new'
+import { Route as AppSubjectsIndexRouteImport } from './routes/_app.subjects.index'
+import { Route as AppSubjectsIdRouteImport } from './routes/_app.subjects.$id'
+import { Route as AppTopicsIdRouteImport } from './routes/_app.topics.$id'
+import { Route as AppNotesEditIdRouteImport } from './routes/_app.notes.edit.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFilesRoute = AppFilesRouteImport.update({
+  id: '/files',
+  path: '/files',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRecentRoute = AppRecentRouteImport.update({
+  id: '/recent',
+  path: '/recent',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppChaptersIdRoute = AppChaptersIdRouteImport.update({
+  id: '/chapters/$id',
+  path: '/chapters/$id',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppNotesIndexRoute = AppNotesIndexRouteImport.update({
+  id: '/notes/',
+  path: '/notes/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppNotesIdRoute = AppNotesIdRouteImport.update({
+  id: '/notes/$id',
+  path: '/notes/$id',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppNotesNewRoute = AppNotesNewRouteImport.update({
+  id: '/notes/new',
+  path: '/notes/new',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSubjectsIndexRoute = AppSubjectsIndexRouteImport.update({
+  id: '/subjects/',
+  path: '/subjects/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSubjectsIdRoute = AppSubjectsIdRouteImport.update({
+  id: '/subjects/$id',
+  path: '/subjects/$id',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTopicsIdRoute = AppTopicsIdRouteImport.update({
+  id: '/topics/$id',
+  path: '/topics/$id',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppNotesEditIdRoute = AppNotesEditIdRouteImport.update({
+  id: '/notes/edit/$id',
+  path: '/notes/edit/$id',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/files': typeof AppFilesRoute
+  '/recent': typeof AppRecentRoute
+  '/settings': typeof AppSettingsRoute
+  '/chapters/$id': typeof AppChaptersIdRoute
+  '/notes/$id': typeof AppNotesIdRoute
+  '/notes/new': typeof AppNotesNewRoute
+  '/subjects/$id': typeof AppSubjectsIdRoute
+  '/topics/$id': typeof AppTopicsIdRoute
+  '/notes/': typeof AppNotesIndexRoute
+  '/subjects/': typeof AppSubjectsIndexRoute
+  '/notes/edit/$id': typeof AppNotesEditIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/files': typeof AppFilesRoute
+  '/recent': typeof AppRecentRoute
+  '/settings': typeof AppSettingsRoute
+  '/chapters/$id': typeof AppChaptersIdRoute
+  '/notes/$id': typeof AppNotesIdRoute
+  '/notes/new': typeof AppNotesNewRoute
+  '/subjects/$id': typeof AppSubjectsIdRoute
+  '/topics/$id': typeof AppTopicsIdRoute
+  '/notes': typeof AppNotesIndexRoute
+  '/subjects': typeof AppSubjectsIndexRoute
+  '/notes/edit/$id': typeof AppNotesEditIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/login': typeof LoginRoute
+  '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/files': typeof AppFilesRoute
+  '/_app/recent': typeof AppRecentRoute
+  '/_app/settings': typeof AppSettingsRoute
+  '/_app/chapters/$id': typeof AppChaptersIdRoute
+  '/_app/notes/$id': typeof AppNotesIdRoute
+  '/_app/notes/new': typeof AppNotesNewRoute
+  '/_app/subjects/$id': typeof AppSubjectsIdRoute
+  '/_app/topics/$id': typeof AppTopicsIdRoute
+  '/_app/notes/': typeof AppNotesIndexRoute
+  '/_app/subjects/': typeof AppSubjectsIndexRoute
+  '/_app/notes/edit/$id': typeof AppNotesEditIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/dashboard'
+    | '/files'
+    | '/recent'
+    | '/settings'
+    | '/chapters/$id'
+    | '/notes/$id'
+    | '/notes/new'
+    | '/subjects/$id'
+    | '/topics/$id'
+    | '/notes/'
+    | '/subjects/'
+    | '/notes/edit/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/login'
+    | '/dashboard'
+    | '/files'
+    | '/recent'
+    | '/settings'
+    | '/chapters/$id'
+    | '/notes/$id'
+    | '/notes/new'
+    | '/subjects/$id'
+    | '/topics/$id'
+    | '/notes'
+    | '/subjects'
+    | '/notes/edit/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/login'
+    | '/_app/dashboard'
+    | '/_app/files'
+    | '/_app/recent'
+    | '/_app/settings'
+    | '/_app/chapters/$id'
+    | '/_app/notes/$id'
+    | '/_app/notes/new'
+    | '/_app/subjects/$id'
+    | '/_app/topics/$id'
+    | '/_app/notes/'
+    | '/_app/subjects/'
+    | '/_app/notes/edit/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  LoginRoute: typeof LoginRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +217,143 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/files': {
+      id: '/_app/files'
+      path: '/files'
+      fullPath: '/files'
+      preLoaderRoute: typeof AppFilesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/recent': {
+      id: '/_app/recent'
+      path: '/recent'
+      fullPath: '/recent'
+      preLoaderRoute: typeof AppRecentRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/settings': {
+      id: '/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/chapters/$id': {
+      id: '/_app/chapters/$id'
+      path: '/chapters/$id'
+      fullPath: '/chapters/$id'
+      preLoaderRoute: typeof AppChaptersIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/notes/': {
+      id: '/_app/notes/'
+      path: '/notes'
+      fullPath: '/notes/'
+      preLoaderRoute: typeof AppNotesIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/notes/$id': {
+      id: '/_app/notes/$id'
+      path: '/notes/$id'
+      fullPath: '/notes/$id'
+      preLoaderRoute: typeof AppNotesIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/notes/new': {
+      id: '/_app/notes/new'
+      path: '/notes/new'
+      fullPath: '/notes/new'
+      preLoaderRoute: typeof AppNotesNewRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/subjects/': {
+      id: '/_app/subjects/'
+      path: '/subjects'
+      fullPath: '/subjects/'
+      preLoaderRoute: typeof AppSubjectsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/subjects/$id': {
+      id: '/_app/subjects/$id'
+      path: '/subjects/$id'
+      fullPath: '/subjects/$id'
+      preLoaderRoute: typeof AppSubjectsIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/topics/$id': {
+      id: '/_app/topics/$id'
+      path: '/topics/$id'
+      fullPath: '/topics/$id'
+      preLoaderRoute: typeof AppTopicsIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/notes/edit/$id': {
+      id: '/_app/notes/edit/$id'
+      path: '/notes/edit/$id'
+      fullPath: '/notes/edit/$id'
+      preLoaderRoute: typeof AppNotesEditIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppFilesRoute: typeof AppFilesRoute
+  AppRecentRoute: typeof AppRecentRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppChaptersIdRoute: typeof AppChaptersIdRoute
+  AppNotesIdRoute: typeof AppNotesIdRoute
+  AppNotesNewRoute: typeof AppNotesNewRoute
+  AppSubjectsIdRoute: typeof AppSubjectsIdRoute
+  AppTopicsIdRoute: typeof AppTopicsIdRoute
+  AppNotesIndexRoute: typeof AppNotesIndexRoute
+  AppSubjectsIndexRoute: typeof AppSubjectsIndexRoute
+  AppNotesEditIdRoute: typeof AppNotesEditIdRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppDashboardRoute: AppDashboardRoute,
+  AppFilesRoute: AppFilesRoute,
+  AppRecentRoute: AppRecentRoute,
+  AppSettingsRoute: AppSettingsRoute,
+  AppChaptersIdRoute: AppChaptersIdRoute,
+  AppNotesIdRoute: AppNotesIdRoute,
+  AppNotesNewRoute: AppNotesNewRoute,
+  AppSubjectsIdRoute: AppSubjectsIdRoute,
+  AppTopicsIdRoute: AppTopicsIdRoute,
+  AppNotesIndexRoute: AppNotesIndexRoute,
+  AppSubjectsIndexRoute: AppSubjectsIndexRoute,
+  AppNotesEditIdRoute: AppNotesEditIdRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
