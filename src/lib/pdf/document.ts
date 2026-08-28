@@ -35,7 +35,8 @@ async function loadPdfMake() {
     import("pdfmake/build/vfs_fonts"),
   ]);
   const mod = vfsModule as unknown as Any;
-  const vfs = (mod.default as Any)?.["vfs"] ?? (mod as Any)["vfs"] ?? mod.default ?? mod;
+  const inner = mod["default"] as Any | undefined;
+  const vfs = inner?.["vfs"] ?? mod["vfs"] ?? inner ?? mod;
   const maker = pdfMake as unknown as Any;
   maker["vfs"] = vfs;
   maker["fonts"] = {
