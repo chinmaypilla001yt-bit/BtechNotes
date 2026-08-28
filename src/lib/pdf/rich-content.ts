@@ -316,7 +316,7 @@ async function listItems(el: HTMLElement, ctx: RenderContext): Promise<Any[]> {
           : { ul: sub, margin: [0, 2, 0, 0] },
       );
     }
-    items.push(stack.length === 1 ? stack[0] : { stack });
+    items.push(stack.length === 1 ? (stack[0] as Any) : { stack });
   }
   return items;
 }
