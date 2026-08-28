@@ -1,15 +1,16 @@
 import { Link, createFileRoute, useParams } from "@tanstack/react-router";
-import { ArrowLeft, ChevronRight, FolderTree, Layers, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, ChevronRight, FileDown, FolderTree, Layers, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EmptyState } from "@/components/EmptyState";
 import { EntityDialog } from "@/components/EntityDialog";
+import { ExportPdfDialog } from "@/components/ExportPdfDialog";
 import { PageSkeleton } from "@/components/Skeletons";
 import { Button } from "@/components/ui/button";
 import { useUid } from "@/hooks/useAuth";
-import { useChapters, useInvalidateAll, useSubjects, useTopics } from "@/hooks/useData";
+import { useChapters, useInvalidateAll, useNotes, useSubjects, useTopics } from "@/hooks/useData";
 import * as api from "@/lib/firestore";
 import { friendlyError } from "@/lib/format";
 
@@ -32,7 +33,9 @@ function SubjectDetailPage() {
   const subjects = useSubjects();
   const chapters = useChapters();
   const topics = useTopics();
+  const notes = useNotes();
 
+  const [exporting, setExporting] = useState(false);
   const [creating, setCreating] = useState(false);
   const [renaming, setRenaming] = useState<{ id: string; name: string } | null>(null);
   const [toDelete, setToDelete] = useState<{ id: string; name: string } | null>(null);
@@ -71,9 +74,14 @@ function SubjectDetailPage() {
             {subjectChapters.length} chapter{subjectChapters.length === 1 ? "" : "s"}
           </p>
         </div>
-        <Button onClick={() => setCreating(true)}>
-          <Plus className="mr-1.5 h-4 w-4" /> Add chapter
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setExporting(true)}>
+            <FileDown className="mr-1.5 h-4 w-4" /> Export PDF
+          </Button>
+          <Button onClick={() => setCreating(true)}>
+            <Plus className="mr-1.5 h-4 w-4" /> Add chapter
+          </Button>
+        </div>
       </header>
 
       {subjectChapters.length === 0 ? (
@@ -132,6 +140,17 @@ function SubjectDetailPage() {
           })}
         </div>
       )}
+
+      <ExportPdfDialog
+        open={exporting}
+        onOpenChange={setExporting}
+        title={subject.name}
+        subject={subject}
+        chapters={subjectChapters}
+        topics={topics.data ?? []}
+        notes={(notes.data ?? []).filter((n) => n.subjectId === subject.id)}
+        selectableChapters
+      />
 
       <EntityDialog
         open={creating}

@@ -246,7 +246,7 @@ async function inlineNodes(node: Node, ctx: RenderContext, marks: Marks = {}): P
     if (tag === "sup") next.sup = true;
     if (tag === "sub") next.sub = true;
     if (tag === "a") {
-      next.link = el.getAttribute("href") ?? undefined;
+      next.link = el.getAttribute("href") ?? "";
       next.color = ctx.accent;
       next.decoration = "underline";
     }
@@ -316,7 +316,7 @@ async function listItems(el: HTMLElement, ctx: RenderContext): Promise<Any[]> {
           : { ul: sub, margin: [0, 2, 0, 0] },
       );
     }
-    items.push(stack.length === 1 ? stack[0] : { stack });
+    items.push(stack.length === 1 ? (stack[0] as Any) : { stack });
   }
   return items;
 }
