@@ -246,7 +246,7 @@ async function inlineNodes(node: Node, ctx: RenderContext, marks: Marks = {}): P
     if (tag === "sup") next.sup = true;
     if (tag === "sub") next.sub = true;
     if (tag === "a") {
-      next.link = el.getAttribute("href") ?? undefined;
+      next.link = el.getAttribute("href") ?? "";
       next.color = ctx.accent;
       next.decoration = "underline";
     }
