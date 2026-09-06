@@ -10,7 +10,7 @@ import { ExportPdfDialog } from "@/components/ExportPdfDialog";
 import { PageSkeleton } from "@/components/Skeletons";
 import { Button } from "@/components/ui/button";
 import { useUid } from "@/hooks/useAuth";
-import { useChapters, useInvalidateAll, useNotes, useSubjects, useTopics } from "@/hooks/useData";
+import { useChapters, useInvalidateAll, useNotes, useSubjects } from "@/hooks/useData";
 import * as api from "@/lib/firestore";
 import { friendlyError } from "@/lib/format";
 
@@ -18,9 +18,9 @@ export const Route = createFileRoute("/_app/subjects/$id")({
   head: () => ({
     meta: [
       { title: "Subject — BTech Notes" },
-      { name: "description", content: "Chapters and topics inside this subject." },
+      { name: "description", content: "Lessons and notes inside this subject." },
       { property: "og:title", content: "Subject — BTech Notes" },
-      { property: "og:description", content: "Chapters and topics inside this subject." },
+      { property: "og:description", content: "Lessons and notes inside this subject." },
     ],
   }),
   component: SubjectDetailPage,
@@ -32,7 +32,6 @@ function SubjectDetailPage() {
   const invalidate = useInvalidateAll();
   const subjects = useSubjects();
   const chapters = useChapters();
-  const topics = useTopics();
   const notes = useNotes();
 
   const [exporting, setExporting] = useState(false);
@@ -58,6 +57,7 @@ function SubjectDetailPage() {
   }
 
   const subjectChapters = (chapters.data ?? []).filter((c) => c.subjectId === id);
+  const subjectNotes = (notes.data ?? []).filter((n) => n.subjectId === subject.id);
 
   return (
     <div className="space-y-6">
@@ -71,7 +71,7 @@ function SubjectDetailPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">{subject.name}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {subjectChapters.length} chapter{subjectChapters.length === 1 ? "" : "s"}
+            {subjectChapters.length} lesson{subjectChapters.length === 1 ? "" : "s"}
           </p>
         </div>
         <div className="flex gap-2">
@@ -79,7 +79,7 @@ function SubjectDetailPage() {
             <FileDown className="mr-1.5 h-4 w-4" /> Export PDF
           </Button>
           <Button onClick={() => setCreating(true)}>
-            <Plus className="mr-1.5 h-4 w-4" /> Add chapter
+            <Plus className="mr-1.5 h-4 w-4" /> Add lesson
           </Button>
         </div>
       </header>
@@ -87,15 +87,15 @@ function SubjectDetailPage() {
       {subjectChapters.length === 0 ? (
         <EmptyState
           icon={Layers}
-          title="No chapters yet"
-          description="Break this subject into chapters to keep topics tidy."
-          actionLabel="Add chapter"
+          title="No lessons yet"
+          description="Break this subject into lessons to keep notes organized."
+          actionLabel="Add lesson"
           onAction={() => setCreating(true)}
         />
       ) : (
         <div className="grid gap-2 sm:grid-cols-2">
           {subjectChapters.map((chapter) => {
-            const count = (topics.data ?? []).filter((t) => t.chapterId === chapter.id).length;
+            const count = subjectNotes.filter((note) => note.chapterId === chapter.id).length;
             return (
               <div
                 key={chapter.id}
@@ -112,7 +112,7 @@ function SubjectDetailPage() {
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-medium">{chapter.name}</span>
                     <span className="text-xs text-muted-foreground">
-                      {count} topic{count === 1 ? "" : "s"}
+                      {count} note{count === 1 ? "" : "s"}
                     </span>
                   </span>
                   <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
@@ -147,15 +147,14 @@ function SubjectDetailPage() {
         title={subject.name}
         subject={subject}
         chapters={subjectChapters}
-        topics={topics.data ?? []}
-        notes={(notes.data ?? []).filter((n) => n.subjectId === subject.id)}
+        notes={subjectNotes}
         selectableChapters
       />
 
       <EntityDialog
         open={creating}
         onOpenChange={setCreating}
-        title="New chapter"
+        title="New lesson"
         placeholder="e.g. 01 — Introduction"
         onSubmit={async (name) => {
           if (!uid) return;
@@ -168,9 +167,9 @@ function SubjectDetailPage() {
               order: subjectChapters.length + 1,
             });
             await invalidate();
-            toast.success("Chapter created.");
+            toast.success("Lesson created.");
           } catch (error) {
-            toast.error(friendlyError(error, "Could not create the chapter."));
+            toast.error(friendlyError(error, "Could not create the lesson."));
           }
         }}
       />
@@ -178,7 +177,7 @@ function SubjectDetailPage() {
       <EntityDialog
         open={renaming !== null}
         onOpenChange={(open) => setRenaming(open ? renaming : null)}
-        title="Rename chapter"
+        title="Rename lesson"
         submitLabel="Save"
         initialValue={renaming?.name ?? ""}
         onSubmit={async (name) => {
@@ -186,9 +185,9 @@ function SubjectDetailPage() {
           try {
             await api.renameEntity(uid, "chapters", renaming.id, name);
             await invalidate();
-            toast.success("Chapter renamed.");
+            toast.success("Lesson renamed.");
           } catch (error) {
-            toast.error(friendlyError(error, "Could not rename the chapter."));
+            toast.error(friendlyError(error, "Could not rename the lesson."));
           }
         }}
       />
@@ -197,15 +196,15 @@ function SubjectDetailPage() {
         open={toDelete !== null}
         onOpenChange={(open) => setToDelete(open ? toDelete : null)}
         title={`Delete "${toDelete?.name}"?`}
-        description="All topics, notes and attached files inside this chapter will be permanently deleted."
+        description="All notes and attached files inside this lesson will be permanently deleted."
         onConfirm={async () => {
           if (!uid || !toDelete) return;
           try {
             await api.deleteChapter(uid, toDelete.id);
             await invalidate();
-            toast.success("Chapter deleted.");
+            toast.success("Lesson deleted.");
           } catch (error) {
-            toast.error(friendlyError(error, "Could not delete the chapter."));
+            toast.error(friendlyError(error, "Could not delete the lesson."));
           }
         }}
       />
