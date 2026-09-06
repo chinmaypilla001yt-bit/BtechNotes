@@ -54,7 +54,7 @@ export async function listChapters(uid: string): Promise<Chapter[]> {
 
 export async function listNotes(uid: string): Promise<Note[]> {
   const snap = await getDocs(col(uid, "notes"));
-  return snap.docs.map((d) => map<Note>(d)).sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
+  return snap.docs.map((d) => map<Note>(d)).sort((a, b) => (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER) || toMillis(a.createdAt) - toMillis(b.createdAt));
 }
 
 export async function getNote(uid: string, id: string): Promise<Note | null> {
@@ -84,7 +84,10 @@ export async function renameEntity(uid: string, name: "years" | "semesters" | "s
 
 /** Move a lesson to a new index within its subject and keep every lesson's order contiguous. */
 export async function reorderChapter(uid: string, chapterId: string, newIndex: number) {
-  const snap = await getDocs(query(col(uid, "chapters"), where("subjectId", "==", (await getDoc(docRef(uid, "chapters", chapterId))).data()?.subjectId)));
+  const chapterSnap = await getDoc(docRef(uid, "chapters", chapterId));
+  const subjectId = chapterSnap.data()?.subjectId;
+  if (!subjectId) throw new Error("Lesson not found.");
+  const snap = await getDocs(query(col(uid, "chapters"), where("subjectId", "==", subjectId)));
   const chapters = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Chapter)).sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
   const currentIndex = chapters.findIndex((c) => c.id === chapterId);
   if (currentIndex < 0) throw new Error("Lesson not found.");
@@ -93,6 +96,24 @@ export async function reorderChapter(uid: string, chapterId: string, newIndex: n
   const [moved] = chapters.splice(currentIndex, 1);
   chapters.splice(targetIndex, 0, moved);
   await Promise.all(chapters.map((chapter, index) => updateDoc(docRef(uid, "chapters", chapter.id), { order: index + 1 })));
+}
+
+/** Move a topic/note to a new index within its lesson and keep every topic index contiguous. */
+export async function reorderNote(uid: string, noteId: string, newIndex: number) {
+  const noteSnap = await getDoc(docRef(uid, "notes", noteId));
+  const chapterId = noteSnap.data()?.chapterId;
+  if (!chapterId) throw new Error("Topic not found.");
+  const snap = await getDocs(query(col(uid, "notes"), where("chapterId", "==", chapterId)));
+  const topicNotes = snap.docs
+    .map((d) => ({ id: d.id, ...d.data() } as Note))
+    .sort((a, b) => (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER) || toMillis(a.createdAt) - toMillis(b.createdAt));
+  const currentIndex = topicNotes.findIndex((n) => n.id === noteId);
+  if (currentIndex < 0) throw new Error("Topic not found.");
+  const targetIndex = Math.max(0, Math.min(newIndex, topicNotes.length - 1));
+  if (currentIndex === targetIndex && topicNotes.every((n, i) => n.order === i + 1)) return;
+  const [moved] = topicNotes.splice(currentIndex, 1);
+  topicNotes.splice(targetIndex, 0, moved);
+  await Promise.all(topicNotes.map((note, index) => updateDoc(docRef(uid, "notes", note.id), { order: index + 1 })));
 }
 
 export interface NoteInput {
@@ -111,7 +132,9 @@ export interface NoteInput {
 }
 
 export async function createNote(uid: string, input: NoteInput) {
-  const created = await addDoc(col(uid, "notes"), { ...input, ownerId: uid, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+  const existing = await getDocs(query(col(uid, "notes"), where("chapterId", "==", input.chapterId)));
+  const nextOrder = existing.docs.reduce((max, d) => Math.max(max, Number(d.data().order) || 0), 0) + 1;
+  const created = await addDoc(col(uid, "notes"), { ...input, order: nextOrder, ownerId: uid, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
   await Promise.all(input.attachments.map((a) => updateDoc(docRef(uid, "files", a.fileId), { noteId: created.id, noteTitle: input.title })));
   return created.id;
 }
