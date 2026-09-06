@@ -7,7 +7,7 @@ export type ExportScope = "note" | "chapter" | "selected" | "subject";
 export interface ExportOptions {
   includeToc: boolean;
   includeChapterNumbers: boolean;
-  includeTopicNumbers: boolean;
+  includeNoteNumbers: boolean;
   includePageNumbers: boolean;
   includeSubjectInfo: boolean;
   includeTags: boolean;
@@ -29,7 +29,7 @@ export interface ExportOptions {
 export const DEFAULT_EXPORT_OPTIONS: ExportOptions = {
   includeToc: true,
   includeChapterNumbers: true,
-  includeTopicNumbers: true,
+  includeNoteNumbers: true,
   includePageNumbers: true,
   includeSubjectInfo: true,
   includeTags: false,
