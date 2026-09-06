@@ -1,5 +1,5 @@
 import { Link, createFileRoute, useParams } from "@tanstack/react-router";
-import { ArrowDown, ArrowLeft, ArrowUp, ChevronRight, FileText, Layers, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, ChevronRight, FileText, Layers, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -35,7 +35,7 @@ function ChapterDetailPage() {
   const [creating, setCreating] = useState(false);
   const [renaming, setRenaming] = useState<{ id: string; name: string } | null>(null);
   const [toDelete, setToDelete] = useState<{ id: string; name: string } | null>(null);
-  const [reordering, setReordering] = useState<string | null>(null);
+  const [savingOrder, setSavingOrder] = useState<string | null>(null);
 
   if (chapters.isLoading || notes.isLoading) return <PageSkeleton />;
 
@@ -52,20 +52,24 @@ function ChapterDetailPage() {
     .filter((n) => n.chapterId === id)
     .sort((a, b) => (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER) || a.title.localeCompare(b.title));
 
-  async function moveTopic(noteId: string, direction: -1 | 1) {
-    if (!uid || reordering) return;
-    const index = chapterNotes.findIndex((note) => note.id === noteId);
-    const target = index + direction;
-    if (index < 0 || target < 0 || target >= chapterNotes.length) return;
-    setReordering(noteId);
+  async function saveTopicIndex(noteId: string, value: string) {
+    if (!uid || savingOrder === noteId) return;
+    const order = Number(value);
+    if (!Number.isInteger(order) || order < 1) {
+      toast.error("Topic index must be a positive whole number.");
+      return;
+    }
+    const current = chapterNotes.find((note) => note.id === noteId)?.order;
+    if (current === order) return;
+    setSavingOrder(noteId);
     try {
-      await api.reorderNote(uid, noteId, target);
+      await api.setNoteOrder(uid, noteId, order);
       await invalidate();
-      toast.success(`Topic moved to index ${target + 1}.`);
+      toast.success(`Topic index set to ${order}.`);
     } catch (error) {
-      toast.error(friendlyError(error, "Could not reorder the topic."));
+      toast.error(friendlyError(error, "Could not update the topic index."));
     } finally {
-      setReordering(null);
+      setSavingOrder(null);
     }
   }
 
@@ -87,28 +91,34 @@ function ChapterDetailPage() {
         <EmptyState icon={FileText} title="No topics yet" description="Add a topic to start building this lesson." actionLabel="Add topic" onAction={() => setCreating(true)} />
       ) : (
         <div className="space-y-2">
-          <p className="text-xs text-muted-foreground">Use ↑ and ↓ to change the topic index. The same order is used in the PDF table of contents.</p>
-          {chapterNotes.map((note, index) => {
-            const busy = reordering === note.id;
+          <p className="text-xs text-muted-foreground">Enter the topic index manually. Press Enter or click outside the field to save. The same index is used in the PDF table of contents.</p>
+          {chapterNotes.map((note) => {
+            const busy = savingOrder === note.id;
             return (
               <div key={note.id} className="flex items-center gap-2 rounded-xl border border-border bg-card p-3 transition-colors hover:border-primary/40">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-sm font-semibold text-primary">{index + 1}</span>
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  defaultValue={note.order ?? ""}
+                  disabled={busy}
+                  aria-label={`Index for ${note.title}`}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.currentTarget.blur();
+                    }
+                  }}
+                  onBlur={(event) => saveTopicIndex(note.id, event.currentTarget.value)}
+                  className="h-8 w-14 shrink-0 rounded-lg border border-input bg-background px-2 text-center text-sm font-semibold text-primary outline-none focus:ring-2 focus:ring-ring"
+                />
                 <Link to="/notes/$id" params={{ id: note.id }} className="group flex min-w-0 flex-1 items-center gap-3">
                   <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary"><FileText className="h-4 w-4" aria-hidden="true" /></span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-medium">{note.title}</span>
-                    <span className="text-xs text-muted-foreground">Topic {index + 1}</span>
+                    <span className="text-xs text-muted-foreground">Topic {note.order ?? "—"}</span>
                   </span>
                   <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
                 </Link>
-                <div className="flex shrink-0 items-center gap-0.5">
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" disabled={index === 0 || !!reordering} aria-label={`Move ${note.title} up`} onClick={() => moveTopic(note.id, -1)}>
-                    <ArrowUp className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" disabled={index === chapterNotes.length - 1 || !!reordering} aria-label={`Move ${note.title} down`} onClick={() => moveTopic(note.id, 1)}>
-                    <ArrowDown className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label={`Rename ${note.title}`} onClick={() => setRenaming({ id: note.id, name: note.title })}><Pencil className="h-3.5 w-3.5" /></Button>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive hover:text-destructive" aria-label={`Delete ${note.title}`} onClick={() => setToDelete({ id: note.id, name: note.title })}><Trash2 className="h-3.5 w-3.5" /></Button>
               </div>
