@@ -7,14 +7,8 @@ import { NoteCard } from "@/components/NoteCard";
 import { ListSkeleton } from "@/components/Skeletons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useChapters, useNotes, useSemesters, useSubjects, useTopics, useYears } from "@/hooks/useData";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useChapters, useNotes, useSemesters, useSubjects, useYears } from "@/hooks/useData";
 import { toMillis } from "@/lib/firestore";
 import { cn } from "@/lib/utils";
 
@@ -38,14 +32,12 @@ function NotesPage() {
   const semesters = useSemesters();
   const subjects = useSubjects();
   const chapters = useChapters();
-  const topics = useTopics();
 
   const [search, setSearch] = useState("");
   const [year, setYear] = useState(ALL);
   const [semester, setSemester] = useState(ALL);
   const [subject, setSubject] = useState(ALL);
   const [chapter, setChapter] = useState(ALL);
-  const [topic, setTopic] = useState(ALL);
   const [sort, setSort] = useState("newest");
   const [view, setView] = useState<"card" | "list">("card");
 
@@ -56,17 +48,8 @@ function NotesPage() {
       if (semester !== ALL && note.semesterId !== semester) return false;
       if (subject !== ALL && note.subjectId !== subject) return false;
       if (chapter !== ALL && note.chapterId !== chapter) return false;
-      if (topic !== ALL && note.topicId !== topic) return false;
       if (!term) return true;
-      return [
-        note.title,
-        note.plainText,
-        note.subjectName,
-        note.chapterName,
-        note.topicName,
-        note.yearName,
-        note.semesterName,
-      ]
+      return [note.title, note.plainText, note.subjectName, note.chapterName, note.yearName, note.semesterName]
         .join(" ")
         .toLowerCase()
         .includes(term);
@@ -78,7 +61,7 @@ function NotesPage() {
       return b.title.localeCompare(a.title);
     });
     return result;
-  }, [notes.data, search, year, semester, subject, chapter, topic, sort]);
+  }, [notes.data, search, year, semester, subject, chapter, sort]);
 
   const filters = [
     { label: "Year", value: year, setValue: setYear, options: years.data ?? [] },
@@ -95,16 +78,10 @@ function NotesPage() {
       options: (subjects.data ?? []).filter((s) => semester === ALL || s.semesterId === semester),
     },
     {
-      label: "Chapter",
+      label: "Lesson",
       value: chapter,
       setValue: setChapter,
       options: (chapters.data ?? []).filter((c) => subject === ALL || c.subjectId === subject),
-    },
-    {
-      label: "Topic",
-      value: topic,
-      setValue: setTopic,
-      options: (topics.data ?? []).filter((t) => chapter === ALL || t.chapterId === chapter),
     },
   ];
 
@@ -126,14 +103,11 @@ function NotesPage() {
 
       <div className="space-y-3 rounded-xl border border-border bg-card p-4">
         <div className="relative">
-          <Search
-            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-            aria-hidden="true"
-          />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
           <Input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search notes by title, content, subject, chapter or topic…"
+            placeholder="Search notes by title, content, subject or lesson…"
             aria-label="Search notes"
             className="pl-9"
           />
@@ -148,9 +122,7 @@ function NotesPage() {
               <SelectContent>
                 <SelectItem value={ALL}>All {filter.label.toLowerCase()}s</SelectItem>
                 {filter.options.map((option) => (
-                  <SelectItem key={option.id} value={option.id}>
-                    {option.name}
-                  </SelectItem>
+                  <SelectItem key={option.id} value={option.id}>{option.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -158,9 +130,7 @@ function NotesPage() {
 
           <div className="flex gap-2">
             <Select value={sort} onValueChange={setSort}>
-              <SelectTrigger aria-label="Sort notes" className="flex-1">
-                <SelectValue />
-              </SelectTrigger>
+              <SelectTrigger aria-label="Sort notes" className="flex-1"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="newest">Newest first</SelectItem>
                 <SelectItem value="oldest">Oldest first</SelectItem>
@@ -185,14 +155,8 @@ function NotesPage() {
       {notes.isLoading ? (
         <ListSkeleton rows={5} />
       ) : (notes.data?.length ?? 0) === 0 ? (
-        <EmptyState
-          icon={FileText}
-          title="No notes yet."
-          description="Start building your knowledge repository."
-        >
-          <Button asChild className="mt-5">
-            <Link to="/notes/new">+ Create Note</Link>
-          </Button>
+        <EmptyState icon={FileText} title="No notes yet." description="Start building your knowledge repository.">
+          <Button asChild className="mt-5"><Link to="/notes/new">+ Create Note</Link></Button>
         </EmptyState>
       ) : filtered.length === 0 ? (
         <EmptyState
@@ -201,19 +165,12 @@ function NotesPage() {
           description="Try a different search term or clear your filters."
           actionLabel="Clear filters"
           onAction={() => {
-            setSearch("");
-            setYear(ALL);
-            setSemester(ALL);
-            setSubject(ALL);
-            setChapter(ALL);
-            setTopic(ALL);
+            setSearch(""); setYear(ALL); setSemester(ALL); setSubject(ALL); setChapter(ALL);
           }}
         />
       ) : (
         <div className={cn(view === "card" ? "grid gap-3 lg:grid-cols-2" : "space-y-2")}>
-          {filtered.map((note) => (
-            <NoteCard key={note.id} note={note} view={view} />
-          ))}
+          {filtered.map((note) => <NoteCard key={note.id} note={note} view={view} />)}
         </div>
       )}
     </div>
