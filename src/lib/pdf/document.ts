@@ -29,24 +29,41 @@ function usableWidth(options: ExportOptions) {
   return w - 100;
 }
 
+/**
+ * pdfmake 0.3 changed the client-side VFS setup and createPdf API.
+ * In particular, createPdf expects an options object internally, so
+ * passing no second argument can cause `progressCallback` errors.
+ */
 async function loadPdfMake() {
   const [{ default: pdfMake }, vfsModule] = await Promise.all([
     import("pdfmake/build/pdfmake"),
     import("pdfmake/build/vfs_fonts"),
   ]);
-  const mod = vfsModule as unknown as Any;
-  const inner = mod["default"] as Any | undefined;
-  const vfs = inner?.["vfs"] ?? mod["vfs"] ?? inner ?? mod;
-  const maker = pdfMake as unknown as Any;
-  maker["vfs"] = vfs;
-  maker["fonts"] = {
-    Roboto: {
-      normal: "Roboto-Regular.ttf",
-      bold: "Roboto-Medium.ttf",
-      italics: "Roboto-Italic.ttf",
-      bolditalics: "Roboto-MediumItalic.ttf",
-    },
+
+  const maker = pdfMake as unknown as Any & {
+    addVirtualFileSystem?: (vfs: unknown) => void;
+    vfs?: unknown;
+    fonts?: unknown;
   };
+  const mod = vfsModule as unknown as Any;
+  const vfs = mod["default"] ?? mod;
+
+  if (typeof maker.addVirtualFileSystem === "function") {
+    maker.addVirtualFileSystem(vfs);
+  } else {
+    // Compatibility fallback for older pdfmake builds.
+    const inner = mod["default"] as Any | undefined;
+    maker["vfs"] = inner?.["vfs"] ?? mod["vfs"] ?? inner ?? mod;
+    maker["fonts"] = {
+      Roboto: {
+        normal: "Roboto-Regular.ttf",
+        bold: "Roboto-Medium.ttf",
+        italics: "Roboto-Italic.ttf",
+        bolditalics: "Roboto-MediumItalic.ttf",
+      },
+    };
+  }
+
   return maker;
 }
 
@@ -247,6 +264,11 @@ export async function downloadPdf(payload: ExportPayload, options: ExportOptions
     loadPdfMake(),
     buildDocDefinition(payload, options),
   ]);
-  const create = maker["createPdf"] as (d: Any) => { download: (name: string) => void };
-  create(docDefinition).download(`${sanitizeFilename(payload.title)}.pdf`);
+  const create = maker["createPdf"] as (d: Any, options?: Any) => {
+    download: (name?: string) => void;
+  };
+  // pdfmake 0.3 expects an options object internally. Passing {} avoids
+  // the `Cannot read properties of undefined (reading 'progressCallback')`
+  // error that occurs when createPdf is called with only the document.
+  create(docDefinition, {}).download(`${sanitizeFilename(payload.title)}.pdf`);
 }
