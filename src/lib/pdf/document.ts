@@ -1,6 +1,6 @@
 /* ------------------------------------------------------------------ *
- * Builds a professional, book-like PDF for a subject / chapters / note
- * using pdfmake. Cover page, table of contents, numbered chapters,
+ * Builds a professional, book-like PDF for a subject / lessons / note
+ * using pdfmake. Cover page, table of contents, numbered lessons,
  * running header, footer with page numbers.
  * ------------------------------------------------------------------ */
 
@@ -137,15 +137,15 @@ export async function buildDocDefinition(payload: ExportPayload, options: Export
     });
   }
 
-  let chapterIndex = 0;
+  let lessonIndex = 0;
   for (const chapter of payload.chapters) {
-    chapterIndex += 1;
-    const chapterTitle = options.includeChapterNumbers
-      ? `Chapter ${chapterIndex} — ${chapter.name}`
+    lessonIndex += 1;
+    const lessonTitle = options.includeChapterNumbers
+      ? `Lesson ${lessonIndex} — ${chapter.name}`
       : chapter.name;
 
     content.push({
-      text: chapterTitle,
+      text: lessonTitle,
       style: "h1",
       color: accent,
       tocItem: options.includeToc,
@@ -157,17 +157,17 @@ export async function buildDocDefinition(payload: ExportPayload, options: Export
       margin: [0, 0, 0, 14],
     });
 
-    const chapterNotes = payload.notes.filter((n) => n.chapterId === chapter.id);
+    const lessonNotes = payload.notes.filter((n) => n.chapterId === chapter.id);
 
-    if (!chapterNotes.length) {
+    if (!lessonNotes.length) {
       content.push({ text: "No notes in this lesson yet.", style: "muted" });
     }
 
     let noteIndex = 0;
-    for (const note of chapterNotes) {
+    for (const note of lessonNotes) {
       noteIndex += 1;
-      const noteTitle = options.includeTopicNumbers
-        ? `${chapterIndex}.${noteIndex} ${note.title}`
+      const noteTitle = options.includeNoteNumbers
+        ? `${lessonIndex}.${noteIndex} ${note.title}`
         : note.title;
       content.push({
         text: noteTitle,
@@ -180,7 +180,7 @@ export async function buildDocDefinition(payload: ExportPayload, options: Export
     }
   }
 
-  // Standalone note export (no chapters supplied)
+  // Standalone note export (no lessons supplied)
   if (!payload.chapters.length) {
     for (const note of payload.notes) {
       content.push({ text: note.title, style: "h1", color: accent, margin: [0, 0, 0, 10] });
