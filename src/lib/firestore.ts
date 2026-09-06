@@ -116,6 +116,12 @@ export async function reorderNote(uid: string, noteId: string, newIndex: number)
   await Promise.all(topicNotes.map((note, index) => updateDoc(docRef(uid, "notes", note.id), { order: index + 1 })));
 }
 
+/** Set a topic's index manually. Unlike reorderNote, this does not change any other topic's index. */
+export async function setNoteOrder(uid: string, noteId: string, order: number) {
+  if (!Number.isInteger(order) || order < 1) throw new Error("Topic index must be a positive whole number.");
+  await updateDoc(docRef(uid, "notes", noteId), { order });
+}
+
 export interface NoteInput {
   title: string;
   content: string;
