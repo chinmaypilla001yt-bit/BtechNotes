@@ -4,22 +4,27 @@ import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import TextAlign from "@tiptap/extension-text-align";
 import Placeholder from "@tiptap/extension-placeholder";
+import Highlight from "@tiptap/extension-highlight";
+import { Color, FontSize, TextStyle } from "@tiptap/extension-text-style";
 import {
   AlignCenter,
   AlignLeft,
   AlignRight,
+  Baseline,
   Bold,
   Code,
   Code2,
   Heading1,
   Heading2,
   Heading3,
+  Highlighter,
   Italic,
   Link as LinkIcon,
   List,
   ListOrdered,
   Quote,
   Redo2,
+  RemoveFormatting,
   Underline as UnderlineIcon,
   Undo2,
 } from "lucide-react";
@@ -28,6 +33,51 @@ import { useEffect } from "react";
 import { Toggle } from "@/components/ui/toggle";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const TEXT_COLORS = [
+  { label: "Default", value: "" },
+  { label: "Red", value: "#ef4444" },
+  { label: "Orange", value: "#f97316" },
+  { label: "Amber", value: "#f59e0b" },
+  { label: "Green", value: "#22c55e" },
+  { label: "Teal", value: "#14b8a6" },
+  { label: "Blue", value: "#3b82f6" },
+  { label: "Indigo", value: "#6366f1" },
+  { label: "Purple", value: "#a855f7" },
+  { label: "Pink", value: "#ec4899" },
+];
+
+const HIGHLIGHTS = [
+  { label: "None", value: "" },
+  { label: "Yellow", value: "#fde68a" },
+  { label: "Green", value: "#bbf7d0" },
+  { label: "Blue", value: "#bfdbfe" },
+  { label: "Pink", value: "#fbcfe8" },
+  { label: "Purple", value: "#e9d5ff" },
+  { label: "Orange", value: "#fed7aa" },
+];
+
+const FONT_SIZES = [
+  { label: "Default", value: "default" },
+  { label: "Small", value: "12px" },
+  { label: "Normal", value: "16px" },
+  { label: "Medium", value: "18px" },
+  { label: "Large", value: "22px" },
+  { label: "Huge", value: "28px" },
+];
+
 
 interface Props {
   content: string;
