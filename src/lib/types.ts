@@ -73,6 +73,8 @@ export interface Note {
   subjectName: string;
   chapterId: string;
   chapterName: string;
+  /** Optional for backward compatibility; used to control topic/note index order. */
+  order?: number;
   attachments: Attachment[];
   createdAt?: Timestamp | null;
   updatedAt?: Timestamp | null;
