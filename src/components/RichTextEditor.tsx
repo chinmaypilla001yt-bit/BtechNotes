@@ -6,6 +6,7 @@ import TextAlign from "@tiptap/extension-text-align";
 import Placeholder from "@tiptap/extension-placeholder";
 import Highlight from "@tiptap/extension-highlight";
 import { Color, FontSize, TextStyle } from "@tiptap/extension-text-style";
+import { Extension } from "@tiptap/core";
 import {
   AlignCenter,
   AlignLeft,
@@ -78,6 +79,38 @@ const FONT_SIZES = [
   { label: "Huge", value: "28px" },
 ];
 
+const LINE_SPACINGS = [
+  { label: "Default", value: "default" },
+  { label: "Single", value: "1" },
+  { label: "1.15", value: "1.15" },
+  { label: "1.5", value: "1.5" },
+  { label: "Double", value: "2" },
+];
+
+const LineSpacing = Extension.create({
+  name: "lineSpacing",
+
+  addGlobalAttributes() {
+    return [
+      {
+        types: ["paragraph", "heading"],
+        attributes: {
+          lineHeight: {
+            default: null,
+            parseHTML: (element) => element.getAttribute("data-line-height"),
+            renderHTML: (attributes) => {
+              if (!attributes.lineHeight) return {};
+              return {
+                "data-line-height": attributes.lineHeight,
+                style: `line-height: ${attributes.lineHeight}`,
+              };
+            },
+          },
+        },
+      },
+    ];
+  },
+});
 
 interface Props {
   content: string;
@@ -110,6 +143,20 @@ function ToolbarButton({
 }
 
 function Toolbar({ editor }: { editor: Editor }) {
+  const activeLineSpacing = editor.getAttributes("paragraph")["lineHeight"] ?? editor.getAttributes("heading")["lineHeight"];
+
+  const setLineSpacing = (value: string) => {
+    editor.chain().focus().command(({ tr, state }) => {
+      const lineHeight = value === "default" ? null : value;
+      const { from, to } = state.selection;
+      state.doc.nodesBetween(from, to, (node, pos) => {
+        if (node.type.name !== "paragraph" && node.type.name !== "heading") return;
+        tr.setNodeMarkup(pos, undefined, { ...node.attrs, lineHeight });
+      });
+      return true;
+    }).run();
+  };
+
   return (
     <div className="flex flex-wrap items-center gap-0.5 border-b border-border bg-card/60 p-1.5">
       <ToolbarButton
@@ -251,6 +298,22 @@ function Toolbar({ editor }: { editor: Editor }) {
         </SelectContent>
       </Select>
 
+      <Select
+        value={activeLineSpacing || "default"}
+        onValueChange={setLineSpacing}
+      >
+        <SelectTrigger className="h-8 w-[112px] text-xs" aria-label="Line spacing" title="Line spacing">
+          <SelectValue placeholder="Line spacing" />
+        </SelectTrigger>
+        <SelectContent>
+          {LINE_SPACINGS.map((spacing) => (
+            <SelectItem key={spacing.value} value={spacing.value} className="text-xs">
+              {spacing.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
       <Popover>
         <PopoverTrigger asChild>
           <Button
@@ -371,6 +434,7 @@ export function RichTextEditor({ content, onChange }: Props) {
       Highlight.configure({ multicolor: true }),
       Link.configure({ openOnClick: false, autolink: true }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
+      LineSpacing,
       Placeholder.configure({ placeholder: "Start writing your notes…" }),
     ],
 
