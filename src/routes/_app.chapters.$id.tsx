@@ -63,29 +63,33 @@ function ChapterDetailPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">{chapter.name}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {chapterNotes.length} note{chapterNotes.length === 1 ? "" : "s"}
+            {chapterNotes.length} topic{chapterNotes.length === 1 ? "" : "s"}
           </p>
         </div>
         <Button onClick={() => setCreating(true)}>
-          <Plus className="mr-1.5 h-4 w-4" /> Add note
+          <Plus className="mr-1.5 h-4 w-4" /> Add topic
         </Button>
       </header>
 
       {chapterNotes.length === 0 ? (
         <EmptyState
           icon={FileText}
-          title="No notes yet"
-          description="Add a note to start building this lesson."
-          actionLabel="Add note"
+          title="No topics yet"
+          description="Add a topic to start building this lesson."
+          actionLabel="Add topic"
           onAction={() => setCreating(true)}
         />
       ) : (
-        <div className="grid gap-2 sm:grid-cols-2">
-          {chapterNotes.map((note) => (
+        <div className="space-y-2">
+          <p className="text-xs text-muted-foreground">Topic numbers are used for the index order.</p>
+          {chapterNotes.map((note, index) => (
             <div
               key={note.id}
               className="flex items-center gap-2 rounded-xl border border-border bg-card p-3 transition-colors hover:border-primary/40"
             >
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-sm font-semibold text-primary">
+                {index + 1}
+              </span>
               <Link
                 to="/notes/$id"
                 params={{ id: note.id }}
@@ -96,7 +100,7 @@ function ChapterDetailPage() {
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-medium">{note.title}</span>
-                  <span className="text-xs text-muted-foreground">Open note</span>
+                  <span className="text-xs text-muted-foreground">Topic {index + 1}</span>
                 </span>
                 <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
               </Link>
@@ -126,7 +130,7 @@ function ChapterDetailPage() {
       <EntityDialog
         open={creating}
         onOpenChange={setCreating}
-        title="New note"
+        title="New topic"
         placeholder="e.g. Binary Search Trees"
         onSubmit={async (name) => {
           if (!uid) return;
@@ -146,10 +150,10 @@ function ChapterDetailPage() {
               attachments: [],
             });
             await invalidate();
-            toast.success("Note created.");
+            toast.success("Topic created.");
             window.location.href = `/notes/${noteId}/edit`;
           } catch (error) {
-            toast.error(friendlyError(error, "Could not create the note."));
+            toast.error(friendlyError(error, "Could not create the topic."));
           }
         }}
       />
@@ -157,7 +161,7 @@ function ChapterDetailPage() {
       <EntityDialog
         open={renaming !== null}
         onOpenChange={(open) => setRenaming(open ? renaming : null)}
-        title="Rename note"
+        title="Rename topic"
         submitLabel="Save"
         initialValue={renaming?.name ?? ""}
         onSubmit={async (name) => {
@@ -165,9 +169,9 @@ function ChapterDetailPage() {
           try {
             await api.renameEntity(uid, "notes", renaming.id, name);
             await invalidate();
-            toast.success("Note renamed.");
+            toast.success("Topic renamed.");
           } catch (error) {
-            toast.error(friendlyError(error, "Could not rename the note."));
+            toast.error(friendlyError(error, "Could not rename the topic."));
           }
         }}
       />
@@ -176,15 +180,15 @@ function ChapterDetailPage() {
         open={toDelete !== null}
         onOpenChange={(open) => setToDelete(open ? toDelete : null)}
         title={`Delete "${toDelete?.name}"?`}
-        description="This permanently deletes the note and its attachments."
+        description="This permanently deletes the topic and its attachments."
         onConfirm={async () => {
           if (!uid || !toDelete) return;
           try {
             await api.deleteNote(uid, toDelete.id);
             await invalidate();
-            toast.success("Note deleted.");
+            toast.success("Topic deleted.");
           } catch (error) {
-            toast.error(friendlyError(error, "Could not delete the note."));
+            toast.error(friendlyError(error, "Could not delete the topic."));
           }
         }}
       />
