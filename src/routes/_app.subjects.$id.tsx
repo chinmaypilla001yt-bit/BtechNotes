@@ -1,5 +1,5 @@
 import { Link, createFileRoute, useParams } from "@tanstack/react-router";
-import { ArrowLeft, ChevronRight, FileDown, FolderTree, Layers, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, ChevronRight, Download, FileDown, FolderTree, Layers, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -13,6 +13,8 @@ import { useUid } from "@/hooks/useAuth";
 import { useChapters, useInvalidateAll, useNotes, useSubjects } from "@/hooks/useData";
 import * as api from "@/lib/firestore";
 import { friendlyError } from "@/lib/format";
+import { downloadPdf } from "@/lib/pdf/document";
+import { DEFAULT_EXPORT_OPTIONS } from "@/lib/pdf/options";
 
 export const Route = createFileRoute("/_app/subjects/$id")({
   head: () => ({
@@ -35,6 +37,7 @@ function SubjectDetailPage() {
   const notes = useNotes();
 
   const [exporting, setExporting] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [renaming, setRenaming] = useState<{ id: string; name: string } | null>(null);
   const [toDelete, setToDelete] = useState<{ id: string; name: string } | null>(null);
@@ -59,6 +62,31 @@ function SubjectDetailPage() {
   const subjectChapters = (chapters.data ?? []).filter((c) => c.subjectId === id);
   const subjectNotes = (notes.data ?? []).filter((n) => n.subjectId === subject.id);
 
+  async function downloadCompleteNotes() {
+    if (!subjectChapters.length || !subjectNotes.length) {
+      toast.error("There are no notes to download yet.");
+      return;
+    }
+
+    setDownloading(true);
+    try {
+      await downloadPdf(
+        {
+          title: subject.name,
+          subject,
+          chapters: subjectChapters,
+          notes: subjectNotes,
+        },
+        DEFAULT_EXPORT_OPTIONS,
+      );
+      toast.success("Complete subject notes downloaded.");
+    } catch (error) {
+      toast.error(friendlyError(error, "Could not download the complete notes."));
+    } finally {
+      setDownloading(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <Button asChild variant="ghost" size="sm" className="-ml-2">
@@ -71,12 +99,20 @@ function SubjectDetailPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">{subject.name}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {subjectChapters.length} lesson{subjectChapters.length === 1 ? "" : "s"}
+            {subjectChapters.length} lesson{subjectChapters.length === 1 ? "" : "s"} · {subjectNotes.length} note{subjectNotes.length === 1 ? "" : "s"}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={downloadCompleteNotes} disabled={downloading || subjectNotes.length === 0}>
+            {downloading ? (
+              <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="mr-1.5 h-4 w-4" />
+            )}
+            Download Complete Notes
+          </Button>
           <Button variant="outline" onClick={() => setExporting(true)}>
-            <FileDown className="mr-1.5 h-4 w-4" /> Export PDF
+            <FileDown className="mr-1.5 h-4 w-4" /> Custom Export
           </Button>
           <Button onClick={() => setCreating(true)}>
             <Plus className="mr-1.5 h-4 w-4" /> Add lesson
