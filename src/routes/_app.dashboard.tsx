@@ -4,7 +4,6 @@ import {
   FileText,
   FolderTree,
   Layers,
-  ListTree,
   Plus,
   Sparkles,
   Upload,
@@ -17,14 +16,14 @@ import { NoteCard } from "@/components/NoteCard";
 import { StatCard } from "@/components/StatCard";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { useChapters, useNotes, useSubjects, useTopics } from "@/hooks/useData";
+import { useChapters, useNotes, useSubjects } from "@/hooks/useData";
 import { greeting } from "@/lib/format";
 
 export const Route = createFileRoute("/_app/dashboard")({
   head: () => ({
     meta: [
       { title: "Dashboard — BTech Notes" },
-      { name: "description", content: "Your BTech notes at a glance: subjects, chapters, topics and recent notes." },
+      { name: "description", content: "Your BTech notes at a glance: subjects, lessons and recent notes." },
       { property: "og:title", content: "Dashboard — BTech Notes" },
       { property: "og:description", content: "Your BTech notes at a glance." },
     ],
@@ -60,10 +59,9 @@ function DashboardPage() {
   const { user } = useAuth();
   const subjects = useSubjects();
   const chapters = useChapters();
-  const topics = useTopics();
   const notes = useNotes();
 
-  const loading = subjects.isLoading || chapters.isLoading || topics.isLoading || notes.isLoading;
+  const loading = subjects.isLoading || chapters.isLoading || notes.isLoading;
   const firstName = (user?.displayName ?? "there").split(" ")[0];
   const recent = (notes.data ?? []).slice(0, 6);
   const isNew =
@@ -83,7 +81,7 @@ function DashboardPage() {
         <Clock />
       </header>
 
-      <section aria-label="Statistics" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section aria-label="Statistics" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <StatCard
           icon={BookOpen}
           label="Total Subjects"
@@ -93,16 +91,9 @@ function DashboardPage() {
         />
         <StatCard
           icon={Layers}
-          label="Total Chapters"
+          label="Total Lessons"
           value={chapters.data?.length ?? 0}
           hint="Across subjects"
-          loading={loading}
-        />
-        <StatCard
-          icon={ListTree}
-          label="Total Topics"
-          value={topics.data?.length ?? 0}
-          hint="Across chapters"
           loading={loading}
         />
         <StatCard
@@ -127,12 +118,7 @@ function DashboardPage() {
         </Button>
         <Button asChild size="sm" variant="outline">
           <Link to="/subjects">
-            <Layers className="mr-1.5 h-4 w-4" /> New Chapter
-          </Link>
-        </Button>
-        <Button asChild size="sm" variant="outline">
-          <Link to="/subjects">
-            <ListTree className="mr-1.5 h-4 w-4" /> New Topic
+            <Layers className="mr-1.5 h-4 w-4" /> New Lesson
           </Link>
         </Button>
         <Button asChild size="sm" variant="outline">

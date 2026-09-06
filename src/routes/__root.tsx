@@ -84,7 +84,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "Organise four years of BTech notes by year, semester, subject, chapter and topic — with private cloud storage for your files.",
+          "Organise four years of BTech notes by year, semester, subject and lesson — with private cloud storage for your files.",
       },
       { property: "og:title", content: "BTech Notes" },
       {

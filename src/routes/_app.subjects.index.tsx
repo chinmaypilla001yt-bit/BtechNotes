@@ -86,7 +86,7 @@ function SubjectsPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Subjects</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Year → Semester → Subject. Open a subject for its chapters and topics.
+            Year → Semester → Subject. Open a subject for its lessons and notes.
           </p>
         </div>
         <Button onClick={() => setDialog({ mode: "create", level: "year" })}>
@@ -268,7 +268,7 @@ function SubjectsPage() {
         open={toDelete !== null}
         onOpenChange={(open) => setToDelete(open ? toDelete : null)}
         title={`Delete "${toDelete?.name}"?`}
-        description={`This permanently deletes everything inside it — semesters, subjects, chapters, topics, notes and attached files. This action cannot be undone.`}
+        description={`This permanently deletes everything inside it — semesters, subjects, lessons, notes and attached files. This action cannot be undone.`}
         onConfirm={async () => {
           if (!uid || !toDelete) return;
           try {

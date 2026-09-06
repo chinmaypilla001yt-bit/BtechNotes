@@ -56,7 +56,6 @@ function NoteDetailPage() {
     data.semesterName,
     data.subjectName,
     data.chapterName,
-    data.topicName,
   ].filter(Boolean);
 
   return (

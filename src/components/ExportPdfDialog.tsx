@@ -32,7 +32,7 @@ import {
   type Orientation,
   type PaperSize,
 } from "@/lib/pdf/options";
-import type { Chapter, Note, Subject, Topic } from "@/lib/types";
+import type { Chapter, Note, Subject } from "@/lib/types";
 
 const PREF_KEY = "btech-notes:pdf-prefs";
 
@@ -55,7 +55,6 @@ export interface ExportPdfDialogProps {
   title: string;
   subject?: Subject | null;
   chapters: Chapter[];
-  topics: Topic[];
   notes: Note[];
   /** Show the chapter picker (subject-level export). */
   selectableChapters?: boolean;
@@ -64,8 +63,7 @@ export interface ExportPdfDialogProps {
 const TOGGLES: { key: keyof ExportOptions; label: string }[] = [
   { key: "coverPage", label: "Cover page" },
   { key: "includeToc", label: "Table of contents" },
-  { key: "includeChapterNumbers", label: "Number chapters" },
-  { key: "includeTopicNumbers", label: "Number topics" },
+  { key: "includeChapterNumbers", label: "Number lessons" },
   { key: "includePageNumbers", label: "Page numbers" },
   { key: "includeSubjectInfo", label: "Subject summary" },
   { key: "includeImages", label: "Images" },
@@ -79,7 +77,6 @@ export function ExportPdfDialog({
   title,
   subject,
   chapters,
-  topics,
   notes,
   selectableChapters = false,
 }: ExportPdfDialogProps) {
@@ -111,7 +108,7 @@ export function ExportPdfDialog({
 
   async function handleExport() {
     if (chapters.length && !chosenChapters.length) {
-      toast.error("Select at least one chapter.");
+      toast.error("Select at least one lesson.");
       return;
     }
     setBusy(true);
@@ -123,7 +120,6 @@ export function ExportPdfDialog({
           title,
           subject: subject ?? null,
           chapters: chosenChapters,
-          topics: chapters.length ? topics.filter((t) => chapterIds.has(t.chapterId)) : topics,
           notes: chapters.length ? notes.filter((n) => chapterIds.has(n.chapterId)) : notes,
         },
         options,
@@ -152,7 +148,7 @@ export function ExportPdfDialog({
             {selectableChapters && chapters.length > 0 ? (
               <section className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold">Chapters</h3>
+                  <h3 className="text-sm font-semibold">Lessons</h3>
                   <Button
                     type="button"
                     variant="ghost"

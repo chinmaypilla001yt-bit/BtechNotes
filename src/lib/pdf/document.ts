@@ -1,10 +1,10 @@
 /* ------------------------------------------------------------------ *
  * Builds a professional, book-like PDF for a subject / chapters / note
- * using pdfmake. Cover page, table of contents, numbered chapters and
- * topics, running header, footer with page numbers.
+ * using pdfmake. Cover page, table of contents, numbered chapters,
+ * running header, footer with page numbers.
  * ------------------------------------------------------------------ */
 
-import type { Chapter, Note, Subject, Topic } from "@/lib/types";
+import type { Chapter, Note, Subject } from "@/lib/types";
 
 import {
   BASE_FONT_SIZE,
@@ -55,7 +55,6 @@ export interface ExportPayload {
   title: string;
   subject?: Subject | null;
   chapters: Chapter[];
-  topics: Topic[];
   notes: Note[];
 }
 
@@ -129,7 +128,7 @@ export async function buildDocDefinition(payload: ExportPayload, options: Export
         widths: ["auto", "*"],
         body: [
           ["Subject", payload.subject.name],
-          ["Chapters", String(payload.chapters.length)],
+          ["Lessons", String(payload.chapters.length)],
           ["Notes", String(payload.notes.length)],
         ],
       },
@@ -158,38 +157,25 @@ export async function buildDocDefinition(payload: ExportPayload, options: Export
       margin: [0, 0, 0, 14],
     });
 
-    const chapterTopics = payload.topics.filter((t) => t.chapterId === chapter.id);
-    const looseNotes = payload.notes.filter(
-      (n) => n.chapterId === chapter.id && !chapterTopics.some((t) => t.id === n.topicId),
-    );
+    const chapterNotes = payload.notes.filter((n) => n.chapterId === chapter.id);
 
-    if (!chapterTopics.length && !looseNotes.length) {
-      content.push({ text: "No notes in this chapter yet.", style: "muted" });
+    if (!chapterNotes.length) {
+      content.push({ text: "No notes in this lesson yet.", style: "muted" });
     }
 
-    let topicIndex = 0;
-    for (const topic of chapterTopics) {
-      const topicNotes = payload.notes.filter((n) => n.topicId === topic.id);
-      if (!topicNotes.length) continue;
-      topicIndex += 1;
-      const topicTitle = options.includeTopicNumbers
-        ? `${chapterIndex}.${topicIndex} ${topic.name}`
-        : topic.name;
+    let noteIndex = 0;
+    for (const note of chapterNotes) {
+      noteIndex += 1;
+      const noteTitle = options.includeTopicNumbers
+        ? `${chapterIndex}.${noteIndex} ${note.title}`
+        : note.title;
       content.push({
-        text: topicTitle,
+        text: noteTitle,
         style: "h2",
         tocItem: options.includeToc,
         tocMargin: [16, 0, 0, 0],
         margin: [0, 12, 0, 6],
       });
-      for (const note of topicNotes) {
-        content.push({ text: note.title, style: "h3", margin: [0, 8, 0, 4] });
-        content.push(...(await htmlToPdfContent(note.content, ctx)));
-      }
-    }
-
-    for (const note of looseNotes) {
-      content.push({ text: note.title, style: "h2", margin: [0, 12, 0, 6] });
       content.push(...(await htmlToPdfContent(note.content, ctx)));
     }
   }

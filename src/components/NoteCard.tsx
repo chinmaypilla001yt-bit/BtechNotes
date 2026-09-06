@@ -45,9 +45,6 @@ export function NoteCard({ note, view = "card" }: { note: Note; view?: "card" | 
             <Badge variant="outline" className="font-normal text-muted-foreground">
               {note.chapterName}
             </Badge>
-            <Badge variant="outline" className="font-normal text-muted-foreground">
-              {note.topicName}
-            </Badge>
             <span className="text-xs text-muted-foreground">
               {note.yearName} · {note.semesterName}
             </span>
