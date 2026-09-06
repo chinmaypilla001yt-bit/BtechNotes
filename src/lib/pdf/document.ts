@@ -29,11 +29,6 @@ function usableWidth(options: ExportOptions) {
   return w - 100;
 }
 
-/**
- * pdfmake 0.3 changed the client-side VFS setup and createPdf API.
- * In particular, createPdf expects an options object internally, so
- * passing no second argument can cause `progressCallback` errors.
- */
 async function loadPdfMake() {
   const [{ default: pdfMake }, vfsModule] = await Promise.all([
     import("pdfmake/build/pdfmake"),
@@ -51,7 +46,6 @@ async function loadPdfMake() {
   if (typeof maker.addVirtualFileSystem === "function") {
     maker.addVirtualFileSystem(vfs);
   } else {
-    // Compatibility fallback for older pdfmake builds.
     const inner = mod["default"] as Any | undefined;
     maker["vfs"] = inner?.["vfs"] ?? mod["vfs"] ?? inner ?? mod;
     maker["fonts"] = {
@@ -92,10 +86,7 @@ function coverPage(payload: ExportPayload, options: ExportOptions, accent: strin
     { text: "STUDY NOTES", style: "coverKicker", color: accent },
     { text: payload.title, style: "coverTitle" },
     payload.subject
-      ? {
-          text: [payload.subject.name].filter(Boolean).join(" · "),
-          style: "coverSubtitle",
-        }
+      ? { text: [payload.subject.name].filter(Boolean).join(" · "), style: "coverSubtitle" }
       : {},
     {
       canvas: [{ type: "rect", x: 0, y: 0, w: 120, h: 2, color: accent }],
@@ -197,7 +188,6 @@ export async function buildDocDefinition(payload: ExportPayload, options: Export
     }
   }
 
-  // Standalone note export (no lessons supplied)
   if (!payload.chapters.length) {
     for (const note of payload.notes) {
       content.push({ text: note.title, style: "h1", color: accent, margin: [0, 0, 0, 10] });
@@ -229,11 +219,7 @@ export async function buildDocDefinition(payload: ExportPayload, options: Export
             columns: [
               { text: "BTech Notes", style: "runningFoot" },
               options.includePageNumbers
-                ? {
-                    text: `${currentPage} / ${pageCount}`,
-                    style: "runningFoot",
-                    alignment: "right",
-                  }
+                ? { text: `${currentPage} / ${pageCount}`, style: "runningFoot", alignment: "right" }
                 : { text: "" },
             ],
             margin: [50, 12, 50, 0],
@@ -264,11 +250,14 @@ export async function downloadPdf(payload: ExportPayload, options: ExportOptions
     loadPdfMake(),
     buildDocDefinition(payload, options),
   ]);
-  const create = maker["createPdf"] as (d: Any, options?: Any) => {
-    download: (name?: string) => void;
-  };
-  // pdfmake 0.3 expects an options object internally. Passing {} avoids
-  // the `Cannot read properties of undefined (reading 'progressCallback')`
-  // error that occurs when createPdf is called with only the document.
-  create(docDefinition, {}).download(`${sanitizeFilename(payload.title)}.pdf`);
+
+  // Keep the method bound to the pdfMake instance. pdfmake 0.3 accesses
+  // this.progressCallback internally, so extracting createPdf into a
+  // standalone function causes `this` to become undefined.
+  const pdf = (maker["createPdf"] as (this: Any, d: Any, options?: Any) => Any).call(
+    maker,
+    docDefinition,
+    {},
+  );
+  pdf.download(`${sanitizeFilename(payload.title)}.pdf`);
 }
