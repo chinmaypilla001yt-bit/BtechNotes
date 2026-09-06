@@ -230,6 +230,107 @@ function Toolbar({ editor }: { editor: Editor }) {
       >
         <AlignRight className="h-4 w-4" />
       </ToolbarButton>
+      <Separator orientation="vertical" className="mx-1 h-6" />
+
+      <Select
+        value={(editor.getAttributes("textStyle")["fontSize"] as string) || "default"}
+        onValueChange={(value) => {
+          if (value === "default") editor.chain().focus().unsetFontSize().run();
+          else editor.chain().focus().setFontSize(value).run();
+        }}
+      >
+        <SelectTrigger className="h-8 w-[104px] text-xs" aria-label="Font size">
+          <SelectValue placeholder="Size" />
+        </SelectTrigger>
+        <SelectContent>
+          {FONT_SIZES.map((size) => (
+            <SelectItem key={size.value} value={size.value} className="text-xs">
+              {size.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0"
+            aria-label="Text colour"
+            title="Text colour"
+          >
+            <Baseline
+              className="h-4 w-4"
+              style={{ color: (editor.getAttributes("textStyle")["color"] as string) || undefined }}
+            />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-44 p-2" align="start">
+          <p className="mb-2 text-xs font-medium text-muted-foreground">Text colour</p>
+          <div className="grid grid-cols-5 gap-1.5">
+            {TEXT_COLORS.map((color) => (
+              <button
+                key={color.label}
+                type="button"
+                title={color.label}
+                aria-label={color.label}
+                className="h-6 w-6 rounded-md border border-border"
+                style={{ background: color.value || "transparent" }}
+                onClick={() =>
+                  color.value
+                    ? editor.chain().focus().setColor(color.value).run()
+                    : editor.chain().focus().unsetColor().run()
+                }
+              />
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
+
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0"
+            aria-label="Highlight"
+            title="Highlight"
+          >
+            <Highlighter className="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-44 p-2" align="start">
+          <p className="mb-2 text-xs font-medium text-muted-foreground">Highlight</p>
+          <div className="grid grid-cols-5 gap-1.5">
+            {HIGHLIGHTS.map((color) => (
+              <button
+                key={color.label}
+                type="button"
+                title={color.label}
+                aria-label={color.label}
+                className="h-6 w-6 rounded-md border border-border"
+                style={{ background: color.value || "transparent" }}
+                onClick={() =>
+                  color.value
+                    ? editor.chain().focus().setHighlight({ color: color.value }).run()
+                    : editor.chain().focus().unsetHighlight().run()
+                }
+              />
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
+
+      <ToolbarButton
+        label="Clear formatting"
+        onClick={() => editor.chain().focus().unsetAllMarks().run()}
+      >
+        <RemoveFormatting className="h-4 w-4" />
+      </ToolbarButton>
+
       <div className="ml-auto flex items-center gap-0.5">
         <Button
           type="button"
@@ -264,10 +365,15 @@ export function RichTextEditor({ content, onChange }: Props) {
     extensions: [
       StarterKit.configure({ link: false }),
       Underline,
+      TextStyle,
+      Color,
+      FontSize,
+      Highlight.configure({ multicolor: true }),
       Link.configure({ openOnClick: false, autolink: true }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       Placeholder.configure({ placeholder: "Start writing your notes…" }),
     ],
+
     content,
     editorProps: {
       attributes: {
