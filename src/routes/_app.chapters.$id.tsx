@@ -1,4 +1,4 @@
-import { Link, createFileRoute, useParams } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate, useParams } from "@tanstack/react-router";
 import { ArrowLeft, ChevronRight, FileText, Layers, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -27,6 +27,7 @@ export const Route = createFileRoute("/_app/chapters/$id")({
 
 function ChapterDetailPage() {
   const { id } = useParams({ from: "/_app/chapters/$id" });
+  const navigate = useNavigate();
   const uid = useUid();
   const invalidate = useInvalidateAll();
   const chapters = useChapters();
@@ -133,7 +134,7 @@ function ChapterDetailPage() {
           const noteId = await api.createNote(uid, { title: name, content: "", plainText: "", yearId: chapter.yearId, yearName: "", semesterId: chapter.semesterId, semesterName: "", subjectId: chapter.subjectId, subjectName: "", chapterId: chapter.id, chapterName: chapter.name, attachments: [] });
           await invalidate();
           toast.success("Topic created.");
-          window.location.href = `/notes/${noteId}/edit`;
+          await navigate({ to: "/notes/edit/$id", params: { id: noteId } });
         } catch (error) { toast.error(friendlyError(error, "Could not create the topic.")); }
       }} />
 
