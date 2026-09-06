@@ -8,7 +8,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useAuth, useUid } from "@/hooks/useAuth";
-import { useChapters, useFiles, useInvalidateAll, useNotes, useSubjects, useTopics } from "@/hooks/useData";
+import { useChapters, useFiles, useInvalidateAll, useNotes, useSubjects } from "@/hooks/useData";
 import * as api from "@/lib/firestore";
 import { formatBytes, friendlyError } from "@/lib/format";
 
@@ -33,7 +33,6 @@ function SettingsPage() {
 
   const subjects = useSubjects();
   const chapters = useChapters();
-  const topics = useTopics();
   const notes = useNotes();
   const files = useFiles();
 
@@ -41,8 +40,7 @@ function SettingsPage() {
 
   const stats = [
     { label: "Subjects", value: subjects.data?.length ?? 0 },
-    { label: "Chapters", value: chapters.data?.length ?? 0 },
-    { label: "Topics", value: topics.data?.length ?? 0 },
+    { label: "Lessons", value: chapters.data?.length ?? 0 },
     { label: "Notes", value: notes.data?.length ?? 0 },
     { label: "Files", value: files.data?.length ?? 0 },
     {
@@ -126,7 +124,7 @@ function SettingsPage() {
           <AlertTriangle className="h-4 w-4" aria-hidden="true" /> Danger zone
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Permanently delete every year, semester, subject, chapter, topic, note and uploaded file in
+          Permanently delete every year, semester, subject, lesson, note and uploaded file in
           your account. This cannot be undone.
         </p>
         <Button variant="destructive" size="sm" className="mt-4" onClick={() => setWiping(true)}>

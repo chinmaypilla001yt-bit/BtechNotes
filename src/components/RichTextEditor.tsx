@@ -4,22 +4,27 @@ import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import TextAlign from "@tiptap/extension-text-align";
 import Placeholder from "@tiptap/extension-placeholder";
+import Highlight from "@tiptap/extension-highlight";
+import { Color, FontSize, TextStyle } from "@tiptap/extension-text-style";
 import {
   AlignCenter,
   AlignLeft,
   AlignRight,
+  Baseline,
   Bold,
   Code,
   Code2,
   Heading1,
   Heading2,
   Heading3,
+  Highlighter,
   Italic,
   Link as LinkIcon,
   List,
   ListOrdered,
   Quote,
   Redo2,
+  RemoveFormatting,
   Underline as UnderlineIcon,
   Undo2,
 } from "lucide-react";
@@ -28,6 +33,51 @@ import { useEffect } from "react";
 import { Toggle } from "@/components/ui/toggle";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const TEXT_COLORS = [
+  { label: "Default", value: "" },
+  { label: "Red", value: "#ef4444" },
+  { label: "Orange", value: "#f97316" },
+  { label: "Amber", value: "#f59e0b" },
+  { label: "Green", value: "#22c55e" },
+  { label: "Teal", value: "#14b8a6" },
+  { label: "Blue", value: "#3b82f6" },
+  { label: "Indigo", value: "#6366f1" },
+  { label: "Purple", value: "#a855f7" },
+  { label: "Pink", value: "#ec4899" },
+];
+
+const HIGHLIGHTS = [
+  { label: "None", value: "" },
+  { label: "Yellow", value: "#fde68a" },
+  { label: "Green", value: "#bbf7d0" },
+  { label: "Blue", value: "#bfdbfe" },
+  { label: "Pink", value: "#fbcfe8" },
+  { label: "Purple", value: "#e9d5ff" },
+  { label: "Orange", value: "#fed7aa" },
+];
+
+const FONT_SIZES = [
+  { label: "Default", value: "default" },
+  { label: "Small", value: "12px" },
+  { label: "Normal", value: "16px" },
+  { label: "Medium", value: "18px" },
+  { label: "Large", value: "22px" },
+  { label: "Huge", value: "28px" },
+];
+
 
 interface Props {
   content: string;
@@ -180,6 +230,107 @@ function Toolbar({ editor }: { editor: Editor }) {
       >
         <AlignRight className="h-4 w-4" />
       </ToolbarButton>
+      <Separator orientation="vertical" className="mx-1 h-6" />
+
+      <Select
+        value={(editor.getAttributes("textStyle")["fontSize"] as string) || "default"}
+        onValueChange={(value) => {
+          if (value === "default") editor.chain().focus().unsetFontSize().run();
+          else editor.chain().focus().setFontSize(value).run();
+        }}
+      >
+        <SelectTrigger className="h-8 w-[104px] text-xs" aria-label="Font size">
+          <SelectValue placeholder="Size" />
+        </SelectTrigger>
+        <SelectContent>
+          {FONT_SIZES.map((size) => (
+            <SelectItem key={size.value} value={size.value} className="text-xs">
+              {size.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0"
+            aria-label="Text colour"
+            title="Text colour"
+          >
+            <Baseline
+              className="h-4 w-4"
+              style={{ color: (editor.getAttributes("textStyle")["color"] as string) || undefined }}
+            />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-44 p-2" align="start">
+          <p className="mb-2 text-xs font-medium text-muted-foreground">Text colour</p>
+          <div className="grid grid-cols-5 gap-1.5">
+            {TEXT_COLORS.map((color) => (
+              <button
+                key={color.label}
+                type="button"
+                title={color.label}
+                aria-label={color.label}
+                className="h-6 w-6 rounded-md border border-border"
+                style={{ background: color.value || "transparent" }}
+                onClick={() =>
+                  color.value
+                    ? editor.chain().focus().setColor(color.value).run()
+                    : editor.chain().focus().unsetColor().run()
+                }
+              />
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
+
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0"
+            aria-label="Highlight"
+            title="Highlight"
+          >
+            <Highlighter className="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-44 p-2" align="start">
+          <p className="mb-2 text-xs font-medium text-muted-foreground">Highlight</p>
+          <div className="grid grid-cols-5 gap-1.5">
+            {HIGHLIGHTS.map((color) => (
+              <button
+                key={color.label}
+                type="button"
+                title={color.label}
+                aria-label={color.label}
+                className="h-6 w-6 rounded-md border border-border"
+                style={{ background: color.value || "transparent" }}
+                onClick={() =>
+                  color.value
+                    ? editor.chain().focus().setHighlight({ color: color.value }).run()
+                    : editor.chain().focus().unsetHighlight().run()
+                }
+              />
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
+
+      <ToolbarButton
+        label="Clear formatting"
+        onClick={() => editor.chain().focus().unsetAllMarks().run()}
+      >
+        <RemoveFormatting className="h-4 w-4" />
+      </ToolbarButton>
+
       <div className="ml-auto flex items-center gap-0.5">
         <Button
           type="button"
@@ -214,10 +365,15 @@ export function RichTextEditor({ content, onChange }: Props) {
     extensions: [
       StarterKit.configure({ link: false }),
       Underline,
+      TextStyle,
+      Color,
+      FontSize,
+      Highlight.configure({ multicolor: true }),
       Link.configure({ openOnClick: false, autolink: true }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       Placeholder.configure({ placeholder: "Start writing your notes…" }),
     ],
+
     content,
     editorProps: {
       attributes: {

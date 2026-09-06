@@ -2,14 +2,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useUid } from "./useAuth";
 import * as api from "@/lib/firestore";
-import type { Chapter, Note, Semester, StoredFile, Subject, Topic, Year } from "@/lib/types";
+import type { Chapter, Note, Semester, StoredFile, Subject, Year } from "@/lib/types";
 
 const keys = {
   years: (uid: string) => ["years", uid],
   semesters: (uid: string) => ["semesters", uid],
   subjects: (uid: string) => ["subjects", uid],
   chapters: (uid: string) => ["chapters", uid],
-  topics: (uid: string) => ["topics", uid],
   notes: (uid: string) => ["notes", uid],
   files: (uid: string) => ["files", uid],
 };
@@ -28,7 +27,6 @@ export const useYears = () => useOwned<Year>("years", api.listYears);
 export const useSemesters = () => useOwned<Semester>("semesters", api.listSemesters);
 export const useSubjects = () => useOwned<Subject>("subjects", api.listSubjects);
 export const useChapters = () => useOwned<Chapter>("chapters", api.listChapters);
-export const useTopics = () => useOwned<Topic>("topics", api.listTopics);
 export const useNotes = () => useOwned<Note>("notes", api.listNotes);
 export const useFiles = () => useOwned<StoredFile>("files", api.listFiles);
 
@@ -46,7 +44,7 @@ export function useInvalidateAll() {
   const qc = useQueryClient();
   return () =>
     Promise.all(
-      ["years", "semesters", "subjects", "chapters", "topics", "notes", "files", "note"].map((k) =>
+      ["years", "semesters", "subjects", "chapters", "notes", "files", "note"].map((k) =>
         qc.invalidateQueries({ queryKey: [k] }),
       ),
     );

@@ -1,6 +1,6 @@
 import type { Timestamp } from "firebase/firestore";
 
-export type Entity = "years" | "semesters" | "subjects" | "chapters" | "topics";
+export type Entity = "years" | "semesters" | "subjects" | "chapters";
 
 export interface UserProfile {
   uid: string;
@@ -48,17 +48,6 @@ export interface Chapter {
   createdAt?: Timestamp | null;
 }
 
-export interface Topic {
-  id: string;
-  ownerId: string;
-  name: string;
-  chapterId: string;
-  subjectId: string;
-  semesterId: string;
-  yearId: string;
-  createdAt?: Timestamp | null;
-}
-
 export interface Attachment {
   fileId: string;
   name: string;
@@ -84,8 +73,6 @@ export interface Note {
   subjectName: string;
   chapterId: string;
   chapterName: string;
-  topicId: string;
-  topicName: string;
   attachments: Attachment[];
   createdAt?: Timestamp | null;
   updatedAt?: Timestamp | null;

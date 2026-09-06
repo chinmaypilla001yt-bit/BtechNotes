@@ -25,7 +25,6 @@ import type {
   Semester,
   StoredFile,
   Subject,
-  Topic,
   Year,
 } from "./types";
 
@@ -36,7 +35,6 @@ import type {
  *   users/{uid}/semesters/{semesterId}      -> yearId
  *   users/{uid}/subjects/{subjectId}        -> yearId, semesterId
  *   users/{uid}/chapters/{chapterId}        -> subjectId, ...
- *   users/{uid}/topics/{topicId}            -> chapterId, ...
  *   users/{uid}/notes/{noteId}
  *   users/{uid}/files/{fileId}
  * Everything lives under users/{uid}, so a single security rule
@@ -91,11 +89,6 @@ export async function listChapters(uid: string): Promise<Chapter[]> {
     .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
 }
 
-export async function listTopics(uid: string): Promise<Topic[]> {
-  const snap = await getDocs(col(uid, "topics"));
-  return snap.docs.map((d) => map<Topic>(d)).sort((a, b) => a.name.localeCompare(b.name));
-}
-
 export async function listNotes(uid: string): Promise<Note[]> {
   const snap = await getDocs(col(uid, "notes"));
   return snap.docs.map((d) => map<Note>(d)).sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
@@ -118,7 +111,7 @@ export const toMillis = (value?: Timestamp | null) =>
 
 export async function createEntity(
   uid: string,
-  name: "years" | "semesters" | "subjects" | "chapters" | "topics",
+  name: "years" | "semesters" | "subjects" | "chapters",
   data: Record<string, unknown>,
 ) {
   const created = await addDoc(col(uid, name), {
@@ -131,7 +124,7 @@ export async function createEntity(
 
 export async function renameEntity(
   uid: string,
-  name: "years" | "semesters" | "subjects" | "chapters" | "topics",
+  name: "years" | "semesters" | "subjects" | "chapters",
   id: string,
   newName: string,
 ) {
@@ -142,7 +135,6 @@ export async function renameEntity(
     semesters: "semesterId",
     subjects: "subjectId",
     chapters: "chapterId",
-    topics: "topicId",
   } as const)[name];
   const nameField = field.replace("Id", "Name");
   const notes = await getDocs(query(col(uid, "notes"), where(field, "==", id)));
@@ -163,8 +155,6 @@ export interface NoteInput {
   subjectName: string;
   chapterId: string;
   chapterName: string;
-  topicId: string;
-  topicName: string;
   attachments: Attachment[];
 }
 
@@ -271,27 +261,19 @@ async function deleteDocsWhere(uid: string, name: string, field: string, id: str
   return snap.docs.map((d) => d.id);
 }
 
-export async function deleteTopic(uid: string, topicId: string) {
-  await deleteNotesWhere(uid, "topicId", topicId);
-  await deleteDoc(docRef(uid, "topics", topicId));
-}
-
 export async function deleteChapter(uid: string, chapterId: string) {
   await deleteNotesWhere(uid, "chapterId", chapterId);
-  await deleteDocsWhere(uid, "topics", "chapterId", chapterId);
   await deleteDoc(docRef(uid, "chapters", chapterId));
 }
 
 export async function deleteSubject(uid: string, subjectId: string) {
   await deleteNotesWhere(uid, "subjectId", subjectId);
-  await deleteDocsWhere(uid, "topics", "subjectId", subjectId);
   await deleteDocsWhere(uid, "chapters", "subjectId", subjectId);
   await deleteDoc(docRef(uid, "subjects", subjectId));
 }
 
 export async function deleteSemester(uid: string, semesterId: string) {
   await deleteNotesWhere(uid, "semesterId", semesterId);
-  await deleteDocsWhere(uid, "topics", "semesterId", semesterId);
   await deleteDocsWhere(uid, "chapters", "semesterId", semesterId);
   await deleteDocsWhere(uid, "subjects", "semesterId", semesterId);
   await deleteDoc(docRef(uid, "semesters", semesterId));
@@ -299,7 +281,6 @@ export async function deleteSemester(uid: string, semesterId: string) {
 
 export async function deleteYear(uid: string, yearId: string) {
   await deleteNotesWhere(uid, "yearId", yearId);
-  await deleteDocsWhere(uid, "topics", "yearId", yearId);
   await deleteDocsWhere(uid, "chapters", "yearId", yearId);
   await deleteDocsWhere(uid, "subjects", "yearId", yearId);
   await deleteDocsWhere(uid, "semesters", "yearId", yearId);
@@ -310,7 +291,7 @@ export async function deleteYear(uid: string, yearId: string) {
 export async function deleteAllUserData(uid: string) {
   const files = await listFiles(uid);
   await Promise.all(files.map((f) => deleteStoredFile(uid, f.id, f.path)));
-  for (const name of ["notes", "topics", "chapters", "subjects", "semesters", "years", "files"]) {
+  for (const name of ["notes", "chapters", "subjects", "semesters", "years", "files"]) {
     const snap = await getDocs(col(uid, name));
     await Promise.all(snap.docs.map((d) => deleteDoc(d.ref)));
   }

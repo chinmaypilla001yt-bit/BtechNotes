@@ -22,7 +22,6 @@ import { Route as AppNotesIdRouteImport } from './routes/_app.notes.$id'
 import { Route as AppNotesNewRouteImport } from './routes/_app.notes.new'
 import { Route as AppSubjectsIndexRouteImport } from './routes/_app.subjects.index'
 import { Route as AppSubjectsIdRouteImport } from './routes/_app.subjects.$id'
-import { Route as AppTopicsIdRouteImport } from './routes/_app.topics.$id'
 import { Route as AppNotesEditIdRouteImport } from './routes/_app.notes.edit.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -89,11 +88,6 @@ const AppSubjectsIdRoute = AppSubjectsIdRouteImport.update({
   path: '/subjects/$id',
   getParentRoute: () => AppRoute,
 } as any)
-const AppTopicsIdRoute = AppTopicsIdRouteImport.update({
-  id: '/topics/$id',
-  path: '/topics/$id',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppNotesEditIdRoute = AppNotesEditIdRouteImport.update({
   id: '/notes/edit/$id',
   path: '/notes/edit/$id',
@@ -111,7 +105,6 @@ export interface FileRoutesByFullPath {
   '/notes/$id': typeof AppNotesIdRoute
   '/notes/new': typeof AppNotesNewRoute
   '/subjects/$id': typeof AppSubjectsIdRoute
-  '/topics/$id': typeof AppTopicsIdRoute
   '/notes/': typeof AppNotesIndexRoute
   '/subjects/': typeof AppSubjectsIndexRoute
   '/notes/edit/$id': typeof AppNotesEditIdRoute
@@ -127,7 +120,6 @@ export interface FileRoutesByTo {
   '/notes/$id': typeof AppNotesIdRoute
   '/notes/new': typeof AppNotesNewRoute
   '/subjects/$id': typeof AppSubjectsIdRoute
-  '/topics/$id': typeof AppTopicsIdRoute
   '/notes': typeof AppNotesIndexRoute
   '/subjects': typeof AppSubjectsIndexRoute
   '/notes/edit/$id': typeof AppNotesEditIdRoute
@@ -145,7 +137,6 @@ export interface FileRoutesById {
   '/_app/notes/$id': typeof AppNotesIdRoute
   '/_app/notes/new': typeof AppNotesNewRoute
   '/_app/subjects/$id': typeof AppSubjectsIdRoute
-  '/_app/topics/$id': typeof AppTopicsIdRoute
   '/_app/notes/': typeof AppNotesIndexRoute
   '/_app/subjects/': typeof AppSubjectsIndexRoute
   '/_app/notes/edit/$id': typeof AppNotesEditIdRoute
@@ -163,7 +154,6 @@ export interface FileRouteTypes {
     | '/notes/$id'
     | '/notes/new'
     | '/subjects/$id'
-    | '/topics/$id'
     | '/notes/'
     | '/subjects/'
     | '/notes/edit/$id'
@@ -179,7 +169,6 @@ export interface FileRouteTypes {
     | '/notes/$id'
     | '/notes/new'
     | '/subjects/$id'
-    | '/topics/$id'
     | '/notes'
     | '/subjects'
     | '/notes/edit/$id'
@@ -196,7 +185,6 @@ export interface FileRouteTypes {
     | '/_app/notes/$id'
     | '/_app/notes/new'
     | '/_app/subjects/$id'
-    | '/_app/topics/$id'
     | '/_app/notes/'
     | '/_app/subjects/'
     | '/_app/notes/edit/$id'
@@ -301,13 +289,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSubjectsIdRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/topics/$id': {
-      id: '/_app/topics/$id'
-      path: '/topics/$id'
-      fullPath: '/topics/$id'
-      preLoaderRoute: typeof AppTopicsIdRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/notes/edit/$id': {
       id: '/_app/notes/edit/$id'
       path: '/notes/edit/$id'
@@ -327,7 +308,6 @@ interface AppRouteChildren {
   AppNotesIdRoute: typeof AppNotesIdRoute
   AppNotesNewRoute: typeof AppNotesNewRoute
   AppSubjectsIdRoute: typeof AppSubjectsIdRoute
-  AppTopicsIdRoute: typeof AppTopicsIdRoute
   AppNotesIndexRoute: typeof AppNotesIndexRoute
   AppSubjectsIndexRoute: typeof AppSubjectsIndexRoute
   AppNotesEditIdRoute: typeof AppNotesEditIdRoute
@@ -342,7 +322,6 @@ const AppRouteChildren: AppRouteChildren = {
   AppNotesIdRoute: AppNotesIdRoute,
   AppNotesNewRoute: AppNotesNewRoute,
   AppSubjectsIdRoute: AppSubjectsIdRoute,
-  AppTopicsIdRoute: AppTopicsIdRoute,
   AppNotesIndexRoute: AppNotesIndexRoute,
   AppSubjectsIndexRoute: AppSubjectsIndexRoute,
   AppNotesEditIdRoute: AppNotesEditIdRoute,
